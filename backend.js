@@ -145,7 +145,23 @@ io.on('connection', (socket) => {
   })
 
   //recieved shooting data from client
-  //socket.on('shoot')
+  socket.on('shoot', ({ x, y, angle }) => {
+    if (room === 0 || !serverSideGulis[room]) return;
+
+    GuliId[room]++;
+
+    const velocity = {
+      x: Math.cos(angle * Math.PI / 180) * 5,
+      y: Math.sin(angle * Math.PI / 180) * 5
+    }
+
+    serverSideGulis[room][GuliId[room]] = {
+      x,
+      y,
+      velocity,
+      playerId: socket.id
+    }
+  })
 
   socket.on('changeFrame', ({ width, height, ratio }) => {
     if (room === 0 || !serverSidePlayers[room]) return;
