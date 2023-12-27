@@ -43,9 +43,88 @@ socket.on('updateGulis', (serverSideGulis) => {
 })
 //render the gulis in canvas
 
-//recieve updated data about players from server, check if they existed in this sides, make update in array
-//sort them according to scores, place them in leaderboard and #whoJoined Div
-//render the players
+socket.on('updatePlayers', (serverSidePlayers) => {
+
+  document.querySelector('#whoJoined').innerHTML = '';
+  for (const id in serverSidePlayers) {
+    const serverSidePlayer = serverSidePlayers[id]
+
+    if (id != socket.id)
+      document.querySelector('#whoJoined').innerHTML +=
+        `<p>${serverSidePlayer.username} joined</p>`;
+
+
+    if (!clientSidePlayers[id]) {
+      clientSidePlayers[id] = new Player({
+        x: serverSidePlayer.x,
+        y: serverSidePlayer.y,
+        radius: 10,
+        color: serverSidePlayer.color,
+        username: serverSidePlayer.username
+      })
+
+      document.querySelector(
+        '#playerLabels'
+      ).innerHTML += `<div data-id="${id}" data-score="${serverSidePlayer.score}">${serverSidePlayer.username}: ${serverSidePlayer.score}</div>`
+    } else {
+      document.querySelector(
+        `div[data-id="${id}"]`
+      ).innerHTML = `${serverSidePlayer.username}: ${serverSidePlayer.score}`
+
+      document
+        .querySelector(`div[data-id="${id}"]`)
+        .setAttribute('data-score', serverSidePlayer.score)
+
+      const parentDiv = document.querySelector('#playerLabels')
+      const childDivs = Array.from(parentDiv.querySelectorAll('div'))
+
+      childDivs.sort((a, b) => {
+        const scoreA = Number(a.getAttribute('data-score'))
+        const scoreB = Number(b.getAttribute('data-score'))
+
+        return scoreB - scoreA
+      })
+
+      childDivs.forEach((div) => {
+        parentDiv.removeChild(div)
+      })
+
+      childDivs.forEach((div) => {
+        parentDiv.appendChild(div)
+      })
+
+      clientSidePlayers[id].target = {
+        x: serverSidePlayer.x,
+        y: serverSidePlayer.y
+      }
+
+      if (id === socket.id) {
+        const lastserverSideInputIndex = playerInputs.findIndex((input) => {
+          return serverSidePlayer.sequenceNumber === input.sequenceNumber
+        })
+
+        if (lastserverSideInputIndex > -1)
+          playerInputs.splice(0, lastserverSideInputIndex + 1)
+
+        playerInputs.forEach((input) => {
+          clientSidePlayers[id].target.x += input.dx
+          clientSidePlayers[id].target.y += input.dy
+        })
+      }
+    }
+  }
+
+  for (const id in clientSidePlayers) {
+    if (!serverSidePlayers[id]) {
+      const divToDelete = document.querySelector(`div[data-id="${id}"]`)
+      divToDelete.parentNode.removeChild(divToDelete)
+
+
+
+      delete clientSidePlayers[id]
+    }
+  }
+})
 
 
 
