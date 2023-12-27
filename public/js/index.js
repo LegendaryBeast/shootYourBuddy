@@ -18,6 +18,30 @@ const clientSideGulis = {}
 
 //recieve updated data about gulis from server, check if they existed in this sides, make update in array
 //render the gulis in canvas
+socket.on('updateGulis', (serverSideGulis) => {
+  for (const id in serverSideGulis) {
+    const serverSideGuli = serverSideGulis[id]
+
+    if (!clientSideGulis[id]) {
+      clientSideGulis[id] = new Guli({
+        x: serverSideGuli.x,
+        y: serverSideGuli.y,
+        radius: 5,
+        color: clientSidePlayers[serverSideGuli.playerId]?.color,
+        velocity: serverSideGuli.velocity
+      })
+    } else {
+      clientSideGulis[id].x += serverSideGulis[id].velocity.x
+      clientSideGulis[id].y += serverSideGulis[id].velocity.y
+    }
+  }
+
+  for (const clientSideGuliId in clientSideGulis) {
+    if (!serverSideGulis[clientSideGuliId]) {
+      delete clientSideGulis[clientSideGuliId]
+    }
+  }
+})
 
 //recieve updated data about players from server, check if they existed in this sides, make update in array
 //sort them according to scores, place them in leaderboard and #whoJoined Div
