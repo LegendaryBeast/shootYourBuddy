@@ -198,8 +198,40 @@ io.on('connection', (socket) => {
     room = 0;
   })
 
-  ////recieved moving data from client
-  //socket.on('move')
+  socket.on('move', ({ angle, sequenceNumber }) => {
+    if (room == 0 || !serverSidePlayers[room] || !serverSidePlayers[room][socket.id]) return
+    const serverSidePlayer = serverSidePlayers[room][socket.id]
+
+
+    serverSidePlayers[room][socket.id].sequenceNumber = sequenceNumber
+
+    serverSidePlayers[room][socket.id].x += 1.5 * Math.cos(angle * Math.PI / 180);
+    serverSidePlayers[room][socket.id].y += 1.5 * Math.sin(angle * Math.PI / 180);
+
+
+
+    const playerSides = {
+      left: serverSidePlayer.x - serverSidePlayer.radius,
+      right: serverSidePlayer.x + serverSidePlayer.radius,
+      top: serverSidePlayer.y - serverSidePlayer.radius,
+      bottom: serverSidePlayer.y + serverSidePlayer.radius
+    }
+
+    if (playerSides.left < 0) serverSidePlayers[room][socket.id].x = serverSidePlayer.radius
+
+    if (playerSides.right > serverSidePlayers[room][socket.id].canvas.width)
+      serverSidePlayers[room][socket.id].x = serverSidePlayers[room][socket.id].canvas.width - serverSidePlayer.radius
+
+    if (playerSides.top < 0) serverSidePlayers[room][socket.id].y = serverSidePlayer.radius
+
+    if (playerSides.bottom > serverSidePlayers[room][socket.id].canvas.height)
+      serverSidePlayers[room][socket.id].y = serverSidePlayers[room][socket.id].canvas.height - serverSidePlayer.radius
+  })
+
+
+
+
+})
 
 })
 
