@@ -228,7 +228,45 @@ setInterval(() => {
   for (const room in runningRooms) {
 
     //check if the guils are out of frame or collide with a player
+    for (const id in serverSideGulis[room]) {
+      serverSideGulis[room][id].x += serverSideGulis[room][id].velocity.x
+      serverSideGulis[room][id].y += serverSideGulis[room][id].velocity.y
 
+      const Guli_RADIUS = 5
+      if (
+        serverSideGulis[room][id].x - Guli_RADIUS >=
+        maxW[room] ||
+        serverSideGulis[room][id].x + Guli_RADIUS <= 0 ||
+        serverSideGulis[room][id].y - Guli_RADIUS >=
+        maxH[room] ||
+        serverSideGulis[room][id].y + Guli_RADIUS <= 0
+      ) {
+        delete serverSideGulis[room][id]
+        continue
+      }
+
+      for (const playerId in serverSidePlayers[room]) {
+        const serverSidePlayer = serverSidePlayers[room][playerId]
+
+        const DISTANCE = Math.hypot(
+          serverSideGulis[room][id].x - serverSidePlayer.x,
+          serverSideGulis[room][id].y - serverSidePlayer.y
+        )
+
+
+        // collision detection
+        if (
+          DISTANCE < Guli_RADIUS + serverSidePlayer.radius &&
+          serverSideGulis[room][id].playerId !== playerId
+        ) {
+          if (serverSidePlayers[room][serverSideGulis[room][id].playerId])
+            serverSidePlayers[room][serverSideGulis[room][id].playerId].score++
+
+          delete serverSideGulis[room][id]
+          break
+        }
+      }
+    }
     io.to(room).emit('updateGulis', serverSideGulis[room])
     io.to(room).emit('updatePlayers', serverSidePlayers[room])
   }
