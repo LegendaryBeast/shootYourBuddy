@@ -119,9 +119,6 @@ io.on('connection', (socket) => {
       socket.emit('initGame');
     }
 
-
-
-
   })
 
   socket.on("rejoinRoom", ({ roomName, userID, width, height, ratio }) => {
@@ -145,19 +142,11 @@ io.on('connection', (socket) => {
       height: height / ratio
     }
 
-
     if (roomStartTime[room]) {
       socket.emit('initGame');
     }
 
-
-
   })
-
-
-
-
-
 
   socket.on('shoot', ({ x, y, angle }) => {
     if (room === 0 || !serverSideGulis[room]) return;
@@ -176,17 +165,13 @@ io.on('connection', (socket) => {
       playerId: socket.id
     }
 
-
-
   })
-
 
   socket.on('changeFrame', ({ width, height, ratio }) => {
     if (room === 0 || !serverSidePlayers[room]) return;
     if (serverSidePlayers[room][socket.id]) {
       serverSidePlayers[room][socket.id].x = width / ratio * Math.random();
       serverSidePlayers[room][socket.id].y = height / ratio * Math.random();
-
 
       serverSidePlayers[room][socket.id].canvas = {
         width: width / ratio,
@@ -209,10 +194,7 @@ io.on('connection', (socket) => {
       if (toldToRequest == false) { socket.emit("requestAgain"); toldToRequest = true; }
     }
 
-
-
   })
-
 
   socket.on('disconnect', (reason) => {
     console.log(socket.id, reason);
@@ -223,13 +205,10 @@ io.on('connection', (socket) => {
     if (room == 0 || !serverSidePlayers[room] || !serverSidePlayers[room][socket.id]) return
     const serverSidePlayer = serverSidePlayers[room][socket.id]
 
-
     serverSidePlayers[room][socket.id].sequenceNumber = sequenceNumber
 
     serverSidePlayers[room][socket.id].x += 1.5 * Math.cos(angle * Math.PI / 180);
     serverSidePlayers[room][socket.id].y += 1.5 * Math.sin(angle * Math.PI / 180);
-
-
 
     const playerSides = {
       left: serverSidePlayer.x - serverSidePlayer.radius,
@@ -249,11 +228,7 @@ io.on('connection', (socket) => {
       serverSidePlayers[room][socket.id].y = serverSidePlayers[room][socket.id].canvas.height - serverSidePlayer.radius
   })
 
-
-
-
 })
-
 
 setInterval(() => {
 
@@ -274,7 +249,6 @@ setInterval(() => {
       delete roomUserIDs[room];
 
     }
-
 
   }
 
@@ -305,7 +279,6 @@ setInterval(() => {
           serverSideGulis[room][id].y - serverSidePlayer.y
         )
 
-
         // collision detection
         if (
           DISTANCE < Guli_RADIUS + serverSidePlayer.radius &&
@@ -325,8 +298,6 @@ setInterval(() => {
   }
 }, 15)
 
-
-
 setInterval(() => {
 
   for (const room in runningRooms) {
@@ -341,18 +312,10 @@ setInterval(() => {
     var min = Math.floor(second / 60);
     second -= min * 60;
 
-
     io.to(room).emit('remainingTime', { min, second });
 
   }
 }, 500)
-
-
-
-
-
-
-
 
 server.listen(port, () => {
   console.log(`App listening on port ${port}`)
@@ -360,12 +323,10 @@ server.listen(port, () => {
 
 console.log('server did load')
 
-
 var ImageKit = require("imagekit");
 
-
 var imagekit = new ImageKit({
-  publicKey : "public_cLDZkbvBc5vSShaos83kdl6rLF4=",
-  privateKey : "private_SUKYsLN9rLisa8RcG7Qg6keRQf8=",
-  urlEndpoint : "https://ik.imagekit.io/shootyourbuddy/"
+  publicKey: "public_cLDZkbvBc5vSShaos83kdl6rLF4=",
+  privateKey: "private_SUKYsLN9rLisa8RcG7Qg6keRQf8=",
+  urlEndpoint: "https://ik.imagekit.io/shootyourbuddy/"
 });
