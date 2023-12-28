@@ -53,8 +53,6 @@ body {
   user-select: none;
 }
 
-
-
 body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -79,10 +77,8 @@ input::placeholder {
   box-sizing: border-box;
 }
 
-
 .neon-button {
   font-size: 2rem;
-
 
   display: inline-block;
   cursor: pointer;
@@ -143,12 +139,8 @@ input::placeholder {
   opacity: 1;
 }
 
-
-
-
 .blue-button {
   font-size: 2rem;
-
 
   display: inline-block;
   cursor: pointer;
@@ -209,8 +201,6 @@ input::placeholder {
 .blue-button:focus::after {
   opacity: 1;
 }
-
-
 
 .button3d {
   --top: rgba(100, 100, 100, .8);
@@ -677,14 +667,6 @@ input::placeholder {
   }
 }
 
-
-
-
-
-
-
-
-
 #file-input {
   display: none;
 }
@@ -695,8 +677,6 @@ input::placeholder {
   border: 5px solid rgb(255, 255, 255);
   border-radius: 4%;
 }
-
-
 
 .button-30 {
   align-items: center;
@@ -744,11 +724,9 @@ input::placeholder {
   transform: translateY(2px);
 }
 
-
 .hideScrollBar::-webkit-scrollbar {
   display: none;
 }
-
 
 .hideScrollBar {
   -ms-overflow-style: none;
@@ -771,9 +749,6 @@ input::placeholder {
   background: #000;
 }
 
-
-
-
 button100 {
   border: none;
   cursor: pointer;
@@ -782,7 +757,6 @@ button100 {
 button100:hover {
   opacity: 0.8;
 }
-
 
 .wrapper {
   width: 300px;
