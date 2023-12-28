@@ -289,18 +289,8 @@ function resize() {
 
 function handleFileSelect(evt) {
   let files = evt.target.files;
-
   let f = files[0];
-
-  // let reader = new FileReader();
-
-  // reader.onload = (function (theFile) {
-  //   return function (e) {
-  //     document.getElementById("avatarImage").src = e.target.result;
-  //   };
-  // })(f);
   document.getElementById("avatarImage").src = 'loading.gif';
-
   upload(f);
 }
 
@@ -491,17 +481,16 @@ function upload(f) {
         contentType: false,
         error: function (jqxhr, text, error) {
           console.log(error);
-          document.getElementById("avatarImage").src = 'avatar.jpg'
+          document.getElementById("avatarImage").src = urlPrefix + myFileName;
         },
         success: function (body) {
           if (body.height && body.width && body.height > 0 && body.width > 0) {
             myFileName = body.name;
-            document.getElementById("avatarImage").src = urlPrefix + myFileName;
           }
           else {
             console.log(body);
-            document.getElementById("avatarImage").src = 'avatar.jpg'
           }
+          document.getElementById("avatarImage").src = urlPrefix + myFileName;
         }
       });
 
@@ -509,7 +498,7 @@ function upload(f) {
 
     error: function (jqxhr, text, error) {
       console.log(error);
-      document.getElementById("avatarImage").src = 'avatar.jpg'
+      document.getElementById("avatarImage").src = urlPrefix + myFileName;
     }
   });
 
