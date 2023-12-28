@@ -10,6 +10,11 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/public/index.html')
 })
 
+app.get('/auth', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.end(JSON.stringify(imagekit.getAuthenticationParameters()));
+})
+
 var uniqueRoom = 1000 + Math.round(Math.random() * 1000);
 var uniqueUserID = 0;
 
@@ -25,7 +30,7 @@ const maxW = {}
 const userMap = {}
 const roomUserIDs = {}
 
-const RADIUS = 20
+const RADIUS = 30
 const GuliId = {}
 
 io.on('connection', (socket) => {
@@ -55,8 +60,7 @@ io.on('connection', (socket) => {
       sequenceNumber: 0,
       score: 0,
       username,
-      ratio
-
+      imageURL
     }
 
     serverSidePlayers[room][socket.id].canvas = {
@@ -98,7 +102,7 @@ io.on('connection', (socket) => {
       sequenceNumber: 0,
       score: 0,
       username,
-      ratio
+      imageURL
 
     }
 
@@ -115,11 +119,14 @@ io.on('connection', (socket) => {
       socket.emit('initGame');
     }
 
+
+
+
   })
 
   socket.on("rejoinRoom", ({ roomName, userID, width, height, ratio }) => {
     console.log("request to rejoin: ", roomName);
-    if (!runningRooms[roomName]) {
+    if (!runningRooms[roomName] || !userMap[userID]) {
       socket.emit('invalidRoom');
       return;
     }
@@ -138,13 +145,20 @@ io.on('connection', (socket) => {
       height: height / ratio
     }
 
+
     if (roomStartTime[room]) {
       socket.emit('initGame');
     }
 
+
+
   })
 
-  //recieved shooting data from client
+
+
+
+
+
   socket.on('shoot', ({ x, y, angle }) => {
     if (room === 0 || !serverSideGulis[room]) return;
 
@@ -161,14 +175,18 @@ io.on('connection', (socket) => {
       velocity,
       playerId: socket.id
     }
+
+
+
   })
+
 
   socket.on('changeFrame', ({ width, height, ratio }) => {
     if (room === 0 || !serverSidePlayers[room]) return;
     if (serverSidePlayers[room][socket.id]) {
       serverSidePlayers[room][socket.id].x = width / ratio * Math.random();
       serverSidePlayers[room][socket.id].y = height / ratio * Math.random();
-      serverSidePlayers[room][socket.id].ratio = ratio;
+
 
       serverSidePlayers[room][socket.id].canvas = {
         width: width / ratio,
@@ -191,7 +209,10 @@ io.on('connection', (socket) => {
       if (toldToRequest == false) { socket.emit("requestAgain"); toldToRequest = true; }
     }
 
+
+
   })
+
 
   socket.on('disconnect', (reason) => {
     console.log(socket.id, reason);
@@ -233,7 +254,6 @@ io.on('connection', (socket) => {
 
 })
 
-})
 
 setInterval(() => {
 
@@ -255,11 +275,11 @@ setInterval(() => {
 
     }
 
+
   }
 
   for (const room in runningRooms) {
 
-    //check if the guils are out of frame or collide with a player
     for (const id in serverSideGulis[room]) {
       serverSideGulis[room][id].x += serverSideGulis[room][id].velocity.x
       serverSideGulis[room][id].y += serverSideGulis[room][id].velocity.y
@@ -299,10 +319,13 @@ setInterval(() => {
         }
       }
     }
+
     io.to(room).emit('updateGulis', serverSideGulis[room])
     io.to(room).emit('updatePlayers', serverSidePlayers[room])
   }
 }, 15)
+
+
 
 setInterval(() => {
 
@@ -318,10 +341,18 @@ setInterval(() => {
     var min = Math.floor(second / 60);
     second -= min * 60;
 
+
     io.to(room).emit('remainingTime', { min, second });
 
   }
 }, 500)
+
+
+
+
+
+
+
 
 server.listen(port, () => {
   console.log(`App listening on port ${port}`)
@@ -329,3 +360,12 @@ server.listen(port, () => {
 
 console.log('server did load')
 
+
+var ImageKit = require("imagekit");
+
+
+var imagekit = new ImageKit({
+  publicKey : "public_cLDZkbvBc5vSShaos83kdl6rLF4=",
+  privateKey : "private_SUKYsLN9rLisa8RcG7Qg6keRQf8=",
+  urlEndpoint : "https://ik.imagekit.io/shootyourbuddy/"
+});
