@@ -52,7 +52,6 @@ socket.on('updatePlayers', (serverSidePlayers) => {
       document.querySelector('#whoJoined').innerHTML +=
         `<p>${serverSidePlayer.username} joined</p>`;
 
-
     if (!clientSidePlayers[id]) {
       clientSidePlayers[id] = new Player({
         x: serverSidePlayer.x,
@@ -119,14 +118,10 @@ socket.on('updatePlayers', (serverSidePlayers) => {
       const divToDelete = document.querySelector(`div[data-id="${id}"]`)
       divToDelete.parentNode.removeChild(divToDelete)
 
-
-
       delete clientSidePlayers[id]
     }
   }
 })
-
-
 
 socket.on('closeGame', () => {
 
@@ -148,13 +143,11 @@ socket.on('closeGame', () => {
     document.querySelector('#endScreen').style.display = 'flex';;
   })
 
-
 })
 
 function animate() {
   let animationId = requestAnimationFrame(animate)
   c.clearRect(0, 0, canvas.width, canvas.height)
-
 
   for (const id in clientSideGulis) {
     const clientSideGuli = clientSideGulis[id]
@@ -174,13 +167,9 @@ function animate() {
     clientSidePlayer.draw()
   }
 
-
-
-
 }
 
 animate()
-
 
 const joystickData = {
   movement: {
@@ -197,13 +186,11 @@ const playerInputs = []
 let sequenceNumber = 0
 setInterval(() => {
 
-
   if (joystickData.movement.moving === true) {
     sequenceNumber++
     playerInputs.push({ sequenceNumber, dx: SPEED * Math.cos(joystickData.movement.angle * Math.PI / 180), dy: SPEED * Math.sin(joystickData.movement.angle * Math.PI / 180) })
     socket.emit('move', { angle: joystickData.movement.angle, sequenceNumber })
   }
-
 
 }, 15)
 
@@ -243,14 +230,9 @@ socket.on("pong", (responseID) => {
   document.querySelector("#latency").innerHTML = "Latency: " + delay + "ms";
 })
 
-
 socket.on("setUserID", (id) => {
   userID = id;
 })
-
-
-
-
 
 window.addEventListener("resize", () => {
   var devicePixelRatio = window.devicePixelRatio || 1
@@ -324,7 +306,6 @@ function handleFileSelect(evt) {
 
 document.getElementById('file-input').addEventListener('change', handleFileSelect, false);
 
-
 document.getElementById('createButton').addEventListener('click', () => {
 
   var v = document.querySelector('#usernameInput').value;
@@ -350,8 +331,6 @@ document.getElementById('createButton').addEventListener('click', () => {
     userID: userID
   })
 
-
-
 });
 
 socket.on('recieveRoomCode', (code) => {
@@ -369,10 +348,7 @@ document.getElementById('startButton').addEventListener('click', () => {
 
   socket.emit('startRoom');
 
-
 })
-
-
 
 function initFromStart() {
   sleep(1000).then(() => {
@@ -417,10 +393,6 @@ socket.on('remainingTime', ({ min, second }) => {
 
 })
 
-
-
-
-
 document.getElementById('joinButton').addEventListener('click', () => {
 
   var v = document.querySelector('#usernameInput').value;
@@ -437,13 +409,7 @@ document.getElementById('joinButton').addEventListener('click', () => {
     document.querySelector('#usernameForm').style.display = 'none';
   })
 
-
-
-
 });
-
-
-
 
 document.getElementById('roomCodeButton').addEventListener('click', () => {
 
@@ -463,12 +429,7 @@ document.getElementById('roomCodeButton').addEventListener('click', () => {
     userID: userID
   })
 
-
-
-
-
 });
-
 
 socket.on('roomJoinSuccess', () => {
 
@@ -485,9 +446,6 @@ socket.on('roomJoinSuccess', () => {
     document.querySelector('#enterRoomCode').style.display = 'none';
   })
 
-
-
-
 })
 
 socket.on('invalidRoom', () => {
@@ -495,7 +453,6 @@ socket.on('invalidRoom', () => {
   if (roomCode == 0) { alert("Invalid Room Code! No such rooms running."); }
   else if (gameClosed == false) { alert("Your room was expired!"); gameClosed = true; }
 })
-
 
 socket.on("requestAgain", () => {
   socket.emit('rejoinRoom', {
@@ -508,14 +465,12 @@ socket.on("requestAgain", () => {
   });
 })
 
-
 function upload(f) {
 
   var formData = new FormData();
   formData.append("file", f);
   formData.append("fileName", "a");
   formData.append("publicKey", "public_cLDZkbvBc5vSShaos83kdl6rLF4=");
-
 
   $.ajax({
     url: "/auth",
@@ -525,7 +480,6 @@ function upload(f) {
       formData.append("signature", body.signature || "");
       formData.append("expire", body.expire || 0);
       formData.append("token", body.token);
-
 
       $.ajax({
         url: "https://upload.imagekit.io/api/v1/files/upload",
@@ -540,7 +494,7 @@ function upload(f) {
           document.getElementById("avatarImage").src = 'avatar.jpg'
         },
         success: function (body) {
-          if (body.height > 0 && body.width > 0) {
+          if (body.height && body.width && body.height > 0 && body.width > 0) {
             myFileName = body.name;
             document.getElementById("avatarImage").src = urlPrefix + myFileName;
           }
