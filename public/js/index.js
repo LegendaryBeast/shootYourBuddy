@@ -4,7 +4,8 @@ var roomCode = 0;
 var gameRunning = false;
 var gameClosed = false;
 var userID = -1;
-
+var myFileName = "avatar";
+const urlPrefix = "https://ik.imagekit.io/shootyourbuddy/tr:w-300,h-300,fo-face,z-1/";
 const socket = io()
 
 var devicePixelRatio = window.devicePixelRatio || 1
@@ -16,7 +17,6 @@ c.scale(devicePixelRatio, devicePixelRatio)
 const clientSidePlayers = {}
 const clientSideGulis = {}
 
-//recieve updated data about gulis from server, check if they existed in this sides, make update in array
 socket.on('updateGulis', (serverSideGulis) => {
   for (const id in serverSideGulis) {
     const serverSideGuli = serverSideGulis[id]
@@ -41,7 +41,6 @@ socket.on('updateGulis', (serverSideGulis) => {
     }
   }
 })
-//render the gulis in canvas
 
 socket.on('updatePlayers', (serverSidePlayers) => {
 
@@ -58,9 +57,10 @@ socket.on('updatePlayers', (serverSidePlayers) => {
       clientSidePlayers[id] = new Player({
         x: serverSidePlayer.x,
         y: serverSidePlayer.y,
-        radius: 10,
+        imageURL: serverSidePlayer.imageURL,
         color: serverSidePlayer.color,
-        username: serverSidePlayer.username
+        username: serverSidePlayer.username,
+        radius: serverSidePlayer.radius
       })
 
       document.querySelector(
@@ -148,11 +148,18 @@ socket.on('closeGame', () => {
     document.querySelector('#endScreen').style.display = 'flex';;
   })
 
+
 })
 
 function animate() {
   let animationId = requestAnimationFrame(animate)
   c.clearRect(0, 0, canvas.width, canvas.height)
+
+
+  for (const id in clientSideGulis) {
+    const clientSideGuli = clientSideGulis[id]
+    clientSideGuli.draw()
+  }
 
   for (const id in clientSidePlayers) {
     const clientSidePlayer = clientSidePlayers[id]
@@ -167,14 +174,13 @@ function animate() {
     clientSidePlayer.draw()
   }
 
-  for (const id in clientSideGulis) {
-    const clientSideGuli = clientSideGulis[id]
-    clientSideGuli.draw()
-  }
+
+
 
 }
 
 animate()
+
 
 const joystickData = {
   movement: {
@@ -186,17 +192,18 @@ const joystickData = {
     moving: false
   }
 }
-
 const SPEED = 1.5
 const playerInputs = []
 let sequenceNumber = 0
 setInterval(() => {
+
 
   if (joystickData.movement.moving === true) {
     sequenceNumber++
     playerInputs.push({ sequenceNumber, dx: SPEED * Math.cos(joystickData.movement.angle * Math.PI / 180), dy: SPEED * Math.sin(joystickData.movement.angle * Math.PI / 180) })
     socket.emit('move', { angle: joystickData.movement.angle, sequenceNumber })
   }
+
 
 }, 15)
 
@@ -236,9 +243,14 @@ socket.on("pong", (responseID) => {
   document.querySelector("#latency").innerHTML = "Latency: " + delay + "ms";
 })
 
+
 socket.on("setUserID", (id) => {
   userID = id;
 })
+
+
+
+
 
 window.addEventListener("resize", () => {
   var devicePixelRatio = window.devicePixelRatio || 1
@@ -298,18 +310,20 @@ function handleFileSelect(evt) {
 
   let f = files[0];
 
-  let reader = new FileReader();
+  // let reader = new FileReader();
 
-  reader.onload = (function (theFile) {
-    return function (e) {
-      document.getElementById("avatarImage").src = e.target.result;
-    };
-  })(f);
+  // reader.onload = (function (theFile) {
+  //   return function (e) {
+  //     document.getElementById("avatarImage").src = e.target.result;
+  //   };
+  // })(f);
+  document.getElementById("avatarImage").src = 'loading.gif';
 
-  reader.readAsDataURL(f);
+  upload(f);
 }
 
 document.getElementById('file-input').addEventListener('change', handleFileSelect, false);
+
 
 document.getElementById('createButton').addEventListener('click', () => {
 
@@ -332,9 +346,11 @@ document.getElementById('createButton').addEventListener('click', () => {
     height: canvas.height,
     ratio: devicePixelRatio,
     username: document.querySelector('#usernameInput').value,
-    imageURL: "",
+    imageURL: myFileName,
     userID: userID
   })
+
+
 
 });
 
@@ -353,7 +369,10 @@ document.getElementById('startButton').addEventListener('click', () => {
 
   socket.emit('startRoom');
 
+
 })
+
+
 
 function initFromStart() {
   sleep(1000).then(() => {
@@ -398,6 +417,10 @@ socket.on('remainingTime', ({ min, second }) => {
 
 })
 
+
+
+
+
 document.getElementById('joinButton').addEventListener('click', () => {
 
   var v = document.querySelector('#usernameInput').value;
@@ -414,7 +437,13 @@ document.getElementById('joinButton').addEventListener('click', () => {
     document.querySelector('#usernameForm').style.display = 'none';
   })
 
+
+
+
 });
+
+
+
 
 document.getElementById('roomCodeButton').addEventListener('click', () => {
 
@@ -430,11 +459,16 @@ document.getElementById('roomCodeButton').addEventListener('click', () => {
     height: canvas.height,
     ratio: devicePixelRatio,
     username: document.querySelector('#usernameInput').value,
-    imageURL: "",
+    imageURL: myFileName,
     userID: userID
   })
 
+
+
+
+
 });
+
 
 socket.on('roomJoinSuccess', () => {
 
@@ -451,6 +485,9 @@ socket.on('roomJoinSuccess', () => {
     document.querySelector('#enterRoomCode').style.display = 'none';
   })
 
+
+
+
 })
 
 socket.on('invalidRoom', () => {
@@ -458,6 +495,7 @@ socket.on('invalidRoom', () => {
   if (roomCode == 0) { alert("Invalid Room Code! No such rooms running."); }
   else if (gameClosed == false) { alert("Your room was expired!"); gameClosed = true; }
 })
+
 
 socket.on("requestAgain", () => {
   socket.emit('rejoinRoom', {
@@ -469,3 +507,56 @@ socket.on("requestAgain", () => {
 
   });
 })
+
+
+function upload(f) {
+
+  var formData = new FormData();
+  formData.append("file", f);
+  formData.append("fileName", "a");
+  formData.append("publicKey", "public_cLDZkbvBc5vSShaos83kdl6rLF4=");
+
+
+  $.ajax({
+    url: "/auth",
+    method: "GET",
+    dataType: "json",
+    success: function (body) {
+      formData.append("signature", body.signature || "");
+      formData.append("expire", body.expire || 0);
+      formData.append("token", body.token);
+
+
+      $.ajax({
+        url: "https://upload.imagekit.io/api/v1/files/upload",
+        method: "POST",
+        mimeType: "multipart/form-data",
+        dataType: "json",
+        data: formData,
+        processData: false,
+        contentType: false,
+        error: function (jqxhr, text, error) {
+          console.log(error);
+          document.getElementById("avatarImage").src = 'avatar.jpg'
+        },
+        success: function (body) {
+          if (body.height > 0 && body.width > 0) {
+            myFileName = body.name;
+            document.getElementById("avatarImage").src = urlPrefix + myFileName;
+          }
+          else {
+            console.log(body);
+            document.getElementById("avatarImage").src = 'avatar.jpg'
+          }
+        }
+      });
+
+    },
+
+    error: function (jqxhr, text, error) {
+      console.log(error);
+      document.getElementById("avatarImage").src = 'avatar.jpg'
+    }
+  });
+
+}
